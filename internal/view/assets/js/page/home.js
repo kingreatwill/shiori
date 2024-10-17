@@ -85,11 +85,14 @@ var template = `
         </a>
     </custom-dialog>
     <custom-dialog v-bind="dialog"/>
+    <calender :calData="calData" :calOpts="calOpts" />
+
 </div>`;
 
 import paginationBox from "../component/pagination.js";
 import bookmarkItem from "../component/bookmark.js";
 import customDialog from "../component/dialog.js";
+import calender from "../component/calender.js";
 import basePage from "./base.js";
 import EventBus from "../component/eventBus.js";
 
@@ -102,19 +105,20 @@ export default {
 		bookmarkItem,
 		paginationBox,
 		customDialog,
+		calender,
 	},
 	data() {
 		return {
 			loading: false,
 			editMode: false,
 			selection: [],
-
 			search: "",
 			page: 0,
 			maxPage: 0,
 			bookmarks: [],
 			tags: [],
-
+			calData: {},
+			calOpts: [],
 			dialogTags: {
 				visible: false,
 				editMode: false,
@@ -1005,6 +1009,48 @@ export default {
 				},
 			});
 		},
+		calPaint(data, opts) {
+			this.calData = data
+			this.calOpts = opts
+		},
+	},
+	created() {
+		const data = {
+			data: {
+				source: [
+					{ date: '2024-10-16', value: 3 },
+					{ date: '2024-10-17', value: 6 },
+					{ date: '2024-09-17', value: 6 },
+				],
+				x: 'date',
+				y: 'value',
+			},
+			verticalOrientation: true,
+			range: 5,
+			itemSelector: '#ex-1',
+			date: { start: new Date('2024-06-01') },
+			scale: { color: { type: 'diverging', scheme: 'PRGn', domain: [-10, 15] } },
+			domain: {
+				type: 'month',
+				padding: [10, 10, 10, 10],
+				label: { position: 'top' },
+				sort: 'desc',
+			},
+			subDomain: { type: 'xDay', radius: 2, width: 15, height: 15, label: 'D' },
+		};
+		const opts = [
+			[
+				Tooltip,
+				{
+					text: function (date, value, dayjsDate) {
+						return (
+							(value ? value + '°C' : 'No data') + ' on ' + dayjsDate.format('LL')
+						);
+					},
+				},
+			],
+		];
+		this.calPaint(data, opts)
 	},
 	mounted() {
 		this.$bus.$on("clearHomePage", () => {
